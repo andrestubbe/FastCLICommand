@@ -1,10 +1,10 @@
-# FastCLICommand 0.1.0 [ALPHA-2026-10] — Zero-Allocation, Ultra-Fast Command Line Parser and Dispatcher for Java
+# FastCLICommand 0.1.1 [ALPHA-2026-10] — Zero-Allocation, Ultra-Fast Command Line Parser and Dispatcher for Java
 
-[![Status](https://img.shields.io/badge/status-0.1.0-brightgreen.svg)](https://github.com/andrestubbe/FastCLICommand/releases/tag/0.1.0)
+[![Status](https://img.shields.io/badge/status-0.1.1-brightgreen.svg)](https://github.com/andrestubbe/FastCLICommand/releases/tag/0.1.1)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Java](https://img.shields.io/badge/Java-21+-blue.svg)](https://www.java.com)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)]()
-[![JitPack](https://img.shields.io/badge/JitPack-0.1.0-green.svg)](https://jitpack.io/#andrestubbe/FastCLICommand)
+[![JitPack](https://img.shields.io/badge/JitPack-0.1.1-green.svg)](https://jitpack.io/#andrestubbe/FastCLICommand)
 
 ---
 

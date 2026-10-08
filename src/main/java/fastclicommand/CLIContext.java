@@ -1,57 +1,64 @@
 package fastclicommand;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
- * Parsed command line context providing zero-overhead, type-safe getters for options and positional arguments.
+ * Immutable and allocation-efficient context representing parsed CLI state.
+ * Uses string array slice indices to defer and avoid intermediate allocations.
  */
 public final class CLIContext {
 
-    private final Map<String, String> options;
-    private final List<String> positionalArgs;
-    private final String rawJoinedText;
+    private final Map<String, String> canonicalOptions;
+    private final String[] rawArgs;
+    private final int[] positionalIndices;
+    private final int positionalCount;
+    private String lazyJoinedArgs;
 
-    public CLIContext(Map<String, String> options, List<String> positionalArgs, String rawJoinedText) {
-        this.options = options != null ? options : Collections.emptyMap();
-        this.positionalArgs = positionalArgs != null ? positionalArgs : Collections.emptyList();
-        this.rawJoinedText = rawJoinedText != null ? rawJoinedText : "";
+    public CLIContext(Map<String, String> canonicalOptions, String[] rawArgs, int[] positionalIndices, int positionalCount) {
+        this.canonicalOptions = canonicalOptions != null ? Collections.unmodifiableMap(canonicalOptions) : Collections.emptyMap();
+        this.rawArgs = rawArgs;
+        this.positionalIndices = positionalIndices;
+        this.positionalCount = positionalCount;
     }
 
     public boolean has(String flag) {
-        return options.containsKey(flag.toLowerCase());
+        if (flag == null) return false;
+        String normalized = normalizeLookupKey(flag);
+        return canonicalOptions.containsKey(normalized);
     }
 
     public boolean has(OptionSpec spec) {
         if (spec == null) return false;
-        if (spec.name() != null && has(spec.name())) return true;
-        return spec.shortName() != null && has(spec.shortName());
+        if (spec.longKey() != null && canonicalOptions.containsKey(spec.longKey())) return true;
+        return spec.shortKey() != null && canonicalOptions.containsKey(spec.shortKey());
     }
 
     public String get(String flag) {
-        return options.get(flag.toLowerCase());
+        if (flag == null) return null;
+        String normalized = normalizeLookupKey(flag);
+        return canonicalOptions.get(normalized);
     }
 
     public String get(String flag, String defaultValue) {
-        return options.getOrDefault(flag.toLowerCase(), defaultValue);
+        String val = get(flag);
+        return val != null ? val : defaultValue;
     }
 
     public String get(OptionSpec spec) {
         if (spec == null) return null;
         String val = null;
-        if (spec.name() != null) val = get(spec.name());
-        if (val == null && spec.shortName() != null) val = get(spec.shortName());
-        return (val != null) ? val : spec.defaultValue();
+        if (spec.longKey() != null) val = canonicalOptions.get(spec.longKey());
+        if (val == null && spec.shortKey() != null) val = canonicalOptions.get(spec.shortKey());
+        return val != null ? val : spec.defaultValue();
     }
 
-    public double getDouble(OptionSpec spec, double defaultFallback) {
-        String val = get(spec);
-        if (val == null) return defaultFallback;
+    public int getInt(String flag) {
+        String val = get(flag);
+        if (val == null) throw new CLIParseException(flag, "Missing required option");
         try {
-            return Double.parseDouble(val.trim().replace(",", "."));
-        } catch (Exception e) {
-            return defaultFallback;
+            return Integer.parseInt(val.trim());
+        } catch (NumberFormatException e) {
+            throw new CLIParseException(flag, "Invalid integer format: '" + val + "'", e);
         }
     }
 
@@ -60,8 +67,28 @@ public final class CLIContext {
         if (val == null) return defaultValue;
         try {
             return Integer.parseInt(val.trim());
-        } catch (Exception e) {
-            return defaultValue;
+        } catch (NumberFormatException e) {
+            throw new CLIParseException(flag, "Invalid integer format: '" + val + "'", e);
+        }
+    }
+
+    public int getInt(OptionSpec spec, int defaultValue) {
+        String val = get(spec);
+        if (val == null) return defaultValue;
+        try {
+            return Integer.parseInt(val.trim());
+        } catch (NumberFormatException e) {
+            throw new CLIParseException(spec.name(), "Invalid integer format: '" + val + "'", e);
+        }
+    }
+
+    public double getDouble(String flag) {
+        String val = get(flag);
+        if (val == null) throw new CLIParseException(flag, "Missing required option");
+        try {
+            return Double.parseDouble(val.trim());
+        } catch (NumberFormatException e) {
+            throw new CLIParseException(flag, "Invalid floating-point number: '" + val + "'", e);
         }
     }
 
@@ -69,9 +96,19 @@ public final class CLIContext {
         String val = get(flag);
         if (val == null) return defaultValue;
         try {
-            return Double.parseDouble(val.trim().replace(",", "."));
-        } catch (Exception e) {
-            return defaultValue;
+            return Double.parseDouble(val.trim());
+        } catch (NumberFormatException e) {
+            throw new CLIParseException(flag, "Invalid floating-point number: '" + val + "'", e);
+        }
+    }
+
+    public double getDouble(OptionSpec spec, double defaultValue) {
+        String val = get(spec);
+        if (val == null) return defaultValue;
+        try {
+            return Double.parseDouble(val.trim());
+        } catch (NumberFormatException e) {
+            throw new CLIParseException(spec.name(), "Invalid floating-point number: '" + val + "'", e);
         }
     }
 
@@ -81,20 +118,47 @@ public final class CLIContext {
         return "true".equalsIgnoreCase(val) || "1".equals(val) || "yes".equalsIgnoreCase(val);
     }
 
-    public List<String> args() {
-        return positionalArgs;
+    public int argCount() {
+        return positionalCount;
     }
 
     public String arg(int index) {
-        return (index >= 0 && index < positionalArgs.size()) ? positionalArgs.get(index) : null;
+        if (index < 0 || index >= positionalCount) return null;
+        return rawArgs[positionalIndices[index]];
     }
 
     public String arg(int index, String defaultValue) {
         String a = arg(index);
-        return (a != null) ? a : defaultValue;
+        return a != null ? a : defaultValue;
+    }
+
+    public List<String> args() {
+        if (positionalCount == 0) return Collections.emptyList();
+        List<String> list = new ArrayList<>(positionalCount);
+        for (int i = 0; i < positionalCount; i++) {
+            list.add(rawArgs[positionalIndices[i]]);
+        }
+        return Collections.unmodifiableList(list);
     }
 
     public String joinedArgs() {
-        return rawJoinedText;
+        if (lazyJoinedArgs != null) return lazyJoinedArgs;
+        if (positionalCount == 0) {
+            lazyJoinedArgs = "";
+            return lazyJoinedArgs;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < positionalCount; i++) {
+            if (i > 0) sb.append(' ');
+            sb.append(rawArgs[positionalIndices[i]]);
+        }
+        lazyJoinedArgs = sb.toString();
+        return lazyJoinedArgs;
+    }
+
+    private static String normalizeLookupKey(String k) {
+        String trimmed = k.trim().toLowerCase(Locale.ROOT);
+        if (trimmed.startsWith("-")) return trimmed;
+        return trimmed.length() == 1 ? ("-" + trimmed) : ("--" + trimmed);
     }
 }

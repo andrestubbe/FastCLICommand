@@ -5,6 +5,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [0.1.1] — 2026-10-08
+
+### Changed
+- **Zero-Allocation Hot Path Optimization**:
+  - Replaced intermediate `copyOfRange` with direct `(from, to)` slice indexing in `FastCLIParser`.
+  - Converted `CLIContext` to a slice-based architecture deferring positional argument concatenation (`joinedArgs()` is now strictly lazy).
+  - Precompiled command option lookups at registration time via `CompiledCommand`, eliminating runtime `HashSet` and allocation churn.
+- **Robustness & Semantic Correctness**:
+  - Normalized long and short keys in `OptionSpec` (`longKey()`, `shortKey()`) ensuring consistent lookups across all conventions.
+  - Added full support for negative numeric arguments (e.g. `--rate -1`, `-5.5`) without misinterpreting them as flags.
+  - Added standard `--` end-of-options delimiter support for raw positional text.
+  - Added `CLIParseException` for strict typing instead of silent error swallowing.
+  - Split router and tokenizer concerns cleanly into `FastCLIRouter` and `FastCLIParser`.
+
 ## [0.1.0] — 2026-10-08
 
 ### Added
