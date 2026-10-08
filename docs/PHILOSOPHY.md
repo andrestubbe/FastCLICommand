@@ -10,7 +10,7 @@ FastCLICommand is built on the principle that command-line interfaces for modern
 ## Core Tenets
 
 ### 1. Reject Runtime Reflection
-Traditional CLI frameworks (such as Picocli or args4j) rely heavily on field reflection, annotations, and dynamic bytecode inspection. In microservices, CLI tools, and GraalVM Native Image binaries, reflection causes noticeable startup delays (20–100 ms) and requires fragile metadata reflection configurations. FastCLICommand uses pure Java interface contracts (`FastCLICommand.execute(ctx)`), guaranteeing instant cold-start execution.
+Traditional CLI frameworks (such as Picocli or args4j) rely heavily on field reflection, annotations, and dynamic bytecode inspection. In microservices, CLI tools, and fast command dispatchers, reflection causes noticeable startup delays (20–100 ms) and bloated class-loading overhead. FastCLICommand uses pure Java interface contracts (`FastCLICommand.execute(ctx)`), guaranteeing instant cold-start execution.
 
 ### 2. Flexible Real-World Syntax
 Developers and end users format CLI parameters differently:

@@ -2,6 +2,15 @@
 
 ## Milestone Status
 
+### Zero-Allocation Parser & Robustness (v0.1.1)
+**Status:** Released
+- [x] Zero-allocation token slicing with direct index offsets in `FastCLIParser`.
+- [x] Lazy positional text slicing in `CLIContext`.
+- [x] Registration-time `CompiledCommand` pre-lookup eliminating runtime hash allocations.
+- [x] Robust negative number parsing without flag collision.
+- [x] Standard `--` end-of-options delimiter support.
+- [x] Strict `CLIParseException` hierarchy.
+
 ### Core Parsing & Dispatching Engine (v0.1.0)
 **Status:** Released
 - [x] Standard `FastCLICommand` interface contract with name, description, aliases, and option specifications.
@@ -10,7 +19,7 @@
 - [x] POSIX short flags and GNU-style long flags.
 - [x] Subcommand resolution, alias mapping, and fallback default command.
 - [x] Automatic global `--help` catalog generation.
-- [x] 100% pure Java 21+ architecture with zero external dependencies.
+- [x] Zero external dependencies and native-image friendly pure Java design.
 - [x] OpenJDK JMH microbenchmark suite and interactive showcase demo.
 
 ---

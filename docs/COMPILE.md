@@ -6,7 +6,7 @@
 
 ## Prerequisites
 
-- **JDK 21 or higher** (OpenJDK, Temurin, Corretto, GraalVM)
+- **JDK 17 or higher** (OpenJDK, Temurin, Corretto)
 - **Apache Maven 3.8+**
 
 Verify your environment:
@@ -26,7 +26,7 @@ From the root of the repository:
 mvn clean package
 ```
 
-The compiled artifact will be created in `target/FastCLICommand-0.1.0.jar`.
+The compiled artifact will be created in `target/FastCLICommand-0.1.1.jar`.
 
 ---
 
