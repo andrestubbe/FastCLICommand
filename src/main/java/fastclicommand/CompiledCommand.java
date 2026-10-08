@@ -12,8 +12,22 @@ public final class CompiledCommand {
     private final List<OptionSpec> declaredOptions;
 
     public CompiledCommand(FastCLICommand command) {
-        this.command = Objects.requireNonNull(command, "command");
-        this.declaredOptions = command.options() != null ? command.options() : Collections.emptyList();
+        this(
+                Objects.requireNonNull(command, "command"),
+                command.options() != null ? command.options() : Collections.emptyList()
+        );
+    }
+
+    public CompiledCommand(String name, String description, List<OptionSpec> declaredOptions) {
+        this(
+                new SimpleFastCLICommand(name, description, declaredOptions),
+                declaredOptions != null ? declaredOptions : Collections.emptyList()
+        );
+    }
+
+    private CompiledCommand(FastCLICommand command, List<OptionSpec> declaredOptions) {
+        this.command = command;
+        this.declaredOptions = declaredOptions;
 
         Map<String, OptionSpec> byKey = new HashMap<>(declaredOptions.size() * 2);
         for (OptionSpec opt : declaredOptions) {
@@ -29,6 +43,13 @@ public final class CompiledCommand {
             }
         }
         this.optionsByKey = Collections.unmodifiableMap(byKey);
+    }
+
+    private record SimpleFastCLICommand(String name, String description, List<OptionSpec> options) implements FastCLICommand {
+        @Override
+        public int execute(CLIContext context) {
+            return 0;
+        }
     }
 
     public FastCLICommand command() {

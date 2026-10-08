@@ -24,10 +24,26 @@ public final class CLIContext {
     public boolean has(String flag) {
         if (flag == null) return false;
         String normalized = normalizeLookupKey(flag);
-        return canonicalOptions.containsKey(normalized);
+        String val = canonicalOptions.get(normalized);
+        if (val == null) return false;
+        return !isFalseString(val);
     }
 
     public boolean has(OptionSpec spec) {
+        if (spec == null) return false;
+        String val = null;
+        if (spec.longKey() != null) val = canonicalOptions.get(spec.longKey());
+        if (val == null && spec.shortKey() != null) val = canonicalOptions.get(spec.shortKey());
+        if (val == null) return false;
+        return !isFalseString(val);
+    }
+
+    public boolean contains(String flag) {
+        if (flag == null) return false;
+        return canonicalOptions.containsKey(normalizeLookupKey(flag));
+    }
+
+    public boolean contains(OptionSpec spec) {
         if (spec == null) return false;
         if (spec.longKey() != null && canonicalOptions.containsKey(spec.longKey())) return true;
         return spec.shortKey() != null && canonicalOptions.containsKey(spec.shortKey());
@@ -68,7 +84,7 @@ public final class CLIContext {
         try {
             return Integer.parseInt(val.trim());
         } catch (NumberFormatException e) {
-            throw new CLIParseException(flag, "Invalid integer format: '" + val + "'", e);
+            return defaultValue;
         }
     }
 
@@ -78,7 +94,7 @@ public final class CLIContext {
         try {
             return Integer.parseInt(val.trim());
         } catch (NumberFormatException e) {
-            throw new CLIParseException(spec.name(), "Invalid integer format: '" + val + "'", e);
+            return defaultValue;
         }
     }
 
@@ -98,7 +114,7 @@ public final class CLIContext {
         try {
             return Double.parseDouble(val.trim());
         } catch (NumberFormatException e) {
-            throw new CLIParseException(flag, "Invalid floating-point number: '" + val + "'", e);
+            return defaultValue;
         }
     }
 
@@ -108,14 +124,28 @@ public final class CLIContext {
         try {
             return Double.parseDouble(val.trim());
         } catch (NumberFormatException e) {
-            throw new CLIParseException(spec.name(), "Invalid floating-point number: '" + val + "'", e);
+            return defaultValue;
         }
     }
 
     public boolean getBoolean(String flag, boolean defaultValue) {
         String val = get(flag);
         if (val == null) return defaultValue;
+        if (isFalseString(val)) return false;
         return "true".equalsIgnoreCase(val) || "1".equals(val) || "yes".equalsIgnoreCase(val);
+    }
+
+    public boolean getBoolean(OptionSpec spec, boolean defaultValue) {
+        String val = get(spec);
+        if (val == null) return defaultValue;
+        if (isFalseString(val)) return false;
+        return "true".equalsIgnoreCase(val) || "1".equals(val) || "yes".equalsIgnoreCase(val);
+    }
+
+    private static boolean isFalseString(String val) {
+        if (val == null) return false;
+        String trimmed = val.trim();
+        return "false".equalsIgnoreCase(trimmed) || "0".equals(trimmed) || "no".equalsIgnoreCase(trimmed) || "off".equalsIgnoreCase(trimmed);
     }
 
     public int argCount() {

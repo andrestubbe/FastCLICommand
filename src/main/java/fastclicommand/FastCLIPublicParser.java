@@ -30,20 +30,9 @@ public final class FastCLIPublicParser {
     }
 
     public CLIContext parseArguments(String[] args, List<OptionSpec> knownOptions) {
-        FastCLICommand dummy = new FastCLICommand() {
-            @Override
-            public String name() { return "default"; }
-
-            @Override
-            public String description() { return "Default"; }
-
-            @Override
-            public List<OptionSpec> options() { return knownOptions; }
-
-            @Override
-            public int execute(CLIContext context) { return 0; }
-        };
-        CompiledCommand compiled = new CompiledCommand(dummy);
+        CompiledCommand compiled = (knownOptions != null && !knownOptions.isEmpty())
+                ? new CompiledCommand("default", "Default", knownOptions)
+                : null;
         int len = args != null ? args.length : 0;
         return parser.parse(args, 0, len, compiled);
     }

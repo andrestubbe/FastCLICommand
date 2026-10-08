@@ -111,4 +111,51 @@ public class FastCLICommandTest {
             parser.parse(new String[] { "--unknown" }, 0, 1, compiled);
         });
     }
+
+    @Test
+    public void testFlagNotSwallowingNextFlag() {
+        FastCLIPublicParser parser = new FastCLIPublicParser();
+        List<OptionSpec> specs = List.of(
+                new OptionSpec("env", "e", "Environment", true),
+                new OptionSpec("verbose", "v", "Verbose flag", false)
+        );
+
+        // When user passes --env followed directly by another flag --verbose, it must fail because value is missing
+        assertThrows(CLIParseException.class, () -> {
+            parser.parseArguments(new String[] { "--env", "--verbose" }, specs);
+        });
+    }
+
+    @Test
+    public void testBooleanFalseHandling() {
+        FastCLIPublicParser parser = new FastCLIPublicParser();
+        List<OptionSpec> specs = List.of(
+                new OptionSpec("release", "r", "Release mode", false)
+        );
+
+        CLIContext ctx = parser.parseArguments(new String[] { "--release:false" }, specs);
+        assertFalse(ctx.has("--release"));
+        assertFalse(ctx.getBoolean("--release", true));
+        assertTrue(ctx.contains("--release"));
+
+        CLIContext ctx2 = parser.parseArguments(new String[] { "--release=0" }, specs);
+        assertFalse(ctx2.has("--release"));
+        assertFalse(ctx2.getBoolean("--release", true));
+
+        CLIContext ctx3 = parser.parseArguments(new String[] { "--release" }, specs);
+        assertTrue(ctx3.has("--release"));
+        assertTrue(ctx3.getBoolean("--release", false));
+    }
+
+    @Test
+    public void testLenientGettersWithDefaultFallback() {
+        FastCLIPublicParser parser = new FastCLIPublicParser();
+        List<OptionSpec> specs = List.of(
+                new OptionSpec("port", "p", "Port", "notANumber")
+        );
+
+        CLIContext ctx = parser.parseArguments(new String[] { "--port", "invalid" }, specs);
+        assertEquals(8080, ctx.getInt("--port", 8080));
+        assertEquals(42.0, ctx.getDouble("--port", 42.0));
+    }
 }

@@ -5,6 +5,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ---
 
+## [0.1.2] — 2026-10-08
+
+### Changed
+- **Parser Robustness & Token Handling**:
+  - Fixed value option consumption to prevent swallowing subsequent flags when an argument value is missing (`--env --verbose`).
+  - Added full boolean value semantics in `CLIContext.has()` and `CLIContext.getBoolean()` respecting explicit `:false`, `=false`, and `0` values.
+  - Added lenient fallback behavior for `getInt(..., defaultValue)` and `getDouble(..., defaultValue)`.
+  - Added `CLIContext.contains()` for pure presence checks regardless of truthiness.
+  - Enforced key normalization in `OptionSpec` compact constructor to prevent normalization bypasses.
+  - Eliminated per-call dummy class allocation in `FastCLIPublicParser.parseArguments()` via `CompiledCommand` option compilation.
+
 ## [0.1.1] — 2026-10-08
 
 ### Changed

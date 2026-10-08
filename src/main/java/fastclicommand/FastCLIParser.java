@@ -24,7 +24,10 @@ public final class FastCLIParser {
         }
 
         int totalArgs = to - from;
-        Map<String, String> parsedOptions = new HashMap<>(totalArgs + 4);
+        int expectedOptions = (compiled != null && !compiled.declaredOptions().isEmpty())
+                ? Math.max(compiled.declaredOptions().size(), totalArgs)
+                : Math.max(totalArgs, 4);
+        Map<String, String> parsedOptions = new HashMap<>(expectedOptions * 4 / 3 + 1);
         int[] positionalIndices = new int[totalArgs];
         int positionalCount = 0;
         boolean parsingOptions = true;
@@ -55,7 +58,7 @@ public final class FastCLIParser {
                     OptionSpec spec = (compiled != null) ? compiled.findOption(rawKey) : null;
 
                     if (spec != null && spec.requiresValue()) {
-                        if (i + 1 < to && !args[i + 1].equals("--")) {
+                        if (i + 1 < to && !args[i + 1].equals("--") && !isFlagToken(args[i + 1])) {
                             recordOption(rawKey, args[i + 1], compiled, parsedOptions);
                             i++;
                         } else {

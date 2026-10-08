@@ -16,6 +16,11 @@ public record OptionSpec(
         String longKey,
         String shortKey
 ) {
+    public OptionSpec {
+        longKey = normalizeLong(name != null ? name : longKey);
+        shortKey = normalizeShort(shortName != null ? shortName : shortKey);
+    }
+
     public OptionSpec(String name, String shortName, String description) {
         this(name, shortName, description, false, null);
     }
@@ -29,15 +34,7 @@ public record OptionSpec(
     }
 
     public OptionSpec(String name, String shortName, String description, boolean requiresValue, String defaultValue) {
-        this(
-                name,
-                shortName,
-                description,
-                requiresValue,
-                defaultValue,
-                normalizeLong(name),
-                normalizeShort(shortName)
-        );
+        this(name, shortName, description, requiresValue, defaultValue, null, null);
     }
 
     private static String normalizeLong(String n) {
