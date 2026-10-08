@@ -73,7 +73,7 @@ public class Demo {
 
 Existing Java command-line libraries (such as Picocli, JCommander, and Apache Commons CLI) were designed decades ago and incur significant startup overhead and architectural baggage:
 
-1. **Heavyweight Reflection & Bytecode Scanning**: Annotation-heavy CLI frameworks inspect classes and methods via runtime reflection, adding 20–100 ms to application startup and bloating GraalVM Native Image reachability metadata.
+1. **Heavyweight Reflection & Bytecode Scanning**: Annotation-heavy CLI frameworks inspect classes and methods via runtime reflection, adding 20–100 ms to application startup and bloating class-loading overhead.
 2. **Excessive Object Allocations**: Traditional parsers construct complex ASTs, option models, and intermediate collections for simple CLI commands, generating heap churn.
 3. **Rigid Parameter Syntax**: Many libraries enforce single delimiter conventions and fail on common variations such as colon (`--param:value`) or space-separated values without verbose configuration.
 4. **Heavy Transitive Dependencies**: Small CLI tools frequently pull megabytes of external dependencies just to parse command flags.
@@ -83,7 +83,6 @@ Existing Java command-line libraries (such as Picocli, JCommander, and Apache Co
 | **Startup Overhead** | Medium (~15–30 ms) | High (~30–90 ms reflection) | **Sub-microsecond (< 1 µs)** |
 | **Throughput** | ~25,000 ops/sec | ~60,000 ops/sec | **> 1,500,000 ops/sec** |
 | **Reflection / Annotations**| Optional | Required | **None (Pure Interface Contract)** |
-| **GraalVM Native Image** | Requires reflection config | Requires build processor | **100% Native-Image Friendly** |
 | **Dependencies** | External JAR | External Annotations + Lib | **Zero Dependencies (Pure Java 21+)** |
 | **GC Pressure** | High | Medium | **Near-Zero Allocation** |
 
@@ -256,11 +255,13 @@ MIT License — See [LICENSE](LICENSE) for details.
 
 ## Related Projects
 
-- [FastANSI](https://github.com/andrestubbe/FastANSI) — High-Performance, Zero-Allocation ANSI and VT100/VT220 Escape Sequence Parser
-- [FastTerminal](https://github.com/andrestubbe/FastTerminal) — High-performance True-Color terminal engine for Java
-- [FastTUI](https://github.com/andrestubbe/FastTUI) — Native Windows TUI widget and application framework for Java
-- [FastConPTY](https://github.com/andrestubbe/FastConPTY) — High-performance native Windows ConPTY terminal substrate
-- [FastCore](https://github.com/andrestubbe/FastCore) — Native library loader, FFM gateway, and platform abstraction
+- [FastANSI](https://github.com/andrestubbe/FastANSI) — Zero-allocation ANSI and VT100/VT220 escape sequence parser and compositor
+- [FastASCII](https://github.com/andrestubbe/FastASCII) — Zero-allocation ASCII/UTF-8 byte engine and high-throughput primitive parsing
+- [FastConPTY](https://github.com/andrestubbe/FastConPTY) — High-performance native Windows ConPTY pseudo-terminal backend
+- [FastTerminal](https://github.com/andrestubbe/FastTerminal) — High-performance True-Color double-buffered terminal rendering engine
+- [FastTerminal3D](https://github.com/andrestubbe/FastTerminal3D) — Real-time software 3D rasterization bridge inside the terminal
+- [FastTUI](https://github.com/andrestubbe/FastTUI) — High-performance native Windows TUI framework with mouse support and widgets
+- [FastCore](https://github.com/andrestubbe/FastCore) — Native library loader, FFM gateway, and platform abstraction layer
 
 ---
 
