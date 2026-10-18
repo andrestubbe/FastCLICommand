@@ -186,6 +186,37 @@ public final class CLIContext {
         return lazyJoinedArgs;
     }
 
+    /**
+     * Expands and returns all positional arguments matching file globs, or verbatim paths if not globs.
+     */
+    public List<String> globArgs() {
+        if (positionalCount == 0) return Collections.emptyList();
+        List<String> raw = args();
+        List<String> out = new ArrayList<>(raw.size() * 2);
+        for (String r : raw) {
+            if (FastCLIGlob.isGlob(r)) {
+                List<String> res = FastCLIGlob.resolve(r);
+                if (res.isEmpty()) out.add(r);
+                else out.addAll(res);
+            } else {
+                out.add(r);
+            }
+        }
+        return Collections.unmodifiableList(out);
+    }
+
+    /**
+     * Retrieves the option value and expands it if it contains glob patterns.
+     */
+    public List<String> getGlobbed(String flag) {
+        String val = get(flag);
+        if (val == null || val.isBlank()) return Collections.emptyList();
+        if (FastCLIGlob.isGlob(val)) {
+            return FastCLIGlob.resolve(val);
+        }
+        return List.of(val);
+    }
+
     private static String normalizeLookupKey(String k) {
         String trimmed = k.trim().toLowerCase(Locale.ROOT);
         if (trimmed.startsWith("-")) return trimmed;

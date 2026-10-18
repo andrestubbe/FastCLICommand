@@ -26,7 +26,7 @@ From the root of the repository:
 mvn clean package
 ```
 
-The compiled artifact will be created in `target/FastCLICommand-0.1.1.jar`.
+The compiled artifact will be created in `target/FastCLICommand-0.1.3.jar`.
 
 ---
 

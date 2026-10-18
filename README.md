@@ -1,10 +1,10 @@
-# FastCLICommand 0.1.2 [ALPHA-2026-10] — Zero-Allocation, Ultra-Fast Command Line Parser and Dispatcher for Java
+# FastCLICommand 0.1.3 [ALPHA-2026-10-18] — Zero-Allocation, Ultra-Fast Command Line Parser and Dispatcher for Java
 
-[![Status](https://img.shields.io/badge/status-0.1.2-brightgreen.svg)](https://github.com/andrestubbe/FastCLICommand/releases/tag/0.1.2)
+[![Status](https://img.shields.io/badge/status-0.1.3-brightgreen.svg)](https://github.com/andrestubbe/FastCLICommand/releases/tag/0.1.3)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Java](https://img.shields.io/badge/Java-21+-blue.svg)](https://www.java.com)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)]()
-[![JitPack](https://img.shields.io/badge/JitPack-0.1.2-green.svg)](https://jitpack.io/#andrestubbe/FastCLICommand)
+[![JitPack](https://img.shields.io/badge/JitPack-0.1.3-green.svg)](https://jitpack.io/#andrestubbe/FastCLICommand)
 
 ---
 
@@ -91,8 +91,9 @@ Existing Java command-line libraries (such as Picocli, JCommander, and Apache Co
 ## Key Features
 
 - ⚡ **Ultra-Fast Dispatching** — Dispatches subcommands and routes flags at over **1.5 million executions per second**.
+- 🔍 **Zero-Overhead Wildcard & Glob Expansion** — Transparently expands wildcards (`*`, `?`, `**`) into sorted file paths via `FastGLOB` native C++/Win32 FFM, with graceful sub-millisecond Java NIO fallback when `FastGLOB` is not present.
 - 🛠️ **Flexible Argument Syntax** — Seamlessly parses GNU-style flags (`--verbose`), short flags (`-v`), equals pairs (`--port=8080`), colon pairs (`--port:8080`), and space-separated values (`--port 8080`).
-- 🎯 **Type-Safe `CLIContext`** — Direct zero-overhead accessors (`ctx.getInt(...)`, `ctx.getDouble(...)`, `ctx.getBoolean(...)`, `ctx.get(...)`, `ctx.joinedArgs()`).
+- 🎯 **Type-Safe `CLIContext`** — Direct zero-overhead accessors (`ctx.getInt(...)`, `ctx.getDouble(...)`, `ctx.getBoolean(...)`, `ctx.get(...)`, `ctx.globArgs()`, `ctx.getGlobbed(...)`, `ctx.joinedArgs()`).
 - 🏷️ **Subcommands & Aliases** — Built-in support for hierarchical commands and shorthand aliases (e.g. `b` for `build`, `s` for `serve`).
 - 📖 **Automatic Help Generation** — Clean, formatted global help generation (`--help`, `-h`, `/?`) with command descriptions and option specifications.
 - 🪶 **Zero Dependency Bloat** — 100% pure Java 21+. Zero external dependencies, no native binaries, no annotation processors.
@@ -189,7 +190,7 @@ Add the JitPack repository and dependency to your `pom.xml`:
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>FastCLICommand</artifactId>
-        <version>0.1.2</version>
+        <version>0.1.3</version>
     </dependency>
 </dependencies>
 ```
@@ -204,7 +205,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:FastCLICommand:0.1.2'
+    implementation 'com.github.andrestubbe:FastCLICommand:0.1.3'
 }
 ```
 
@@ -212,7 +213,7 @@ dependencies {
 
 Download the latest pre-compiled JAR directly from GitHub Releases:
 
-1. 📦 [**FastCLICommand-0.1.2.jar**](https://github.com/andrestubbe/FastCLICommand/releases/download/0.1.2/FastCLICommand-0.1.2.jar)
+1. 📦 [**FastCLICommand-0.1.3.jar**](https://github.com/andrestubbe/FastCLICommand/releases/download/0.1.3/FastCLICommand-0.1.3.jar)
 
 ---
 

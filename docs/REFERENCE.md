@@ -35,9 +35,11 @@ Encapsulates parsed command-line parameters, options, and trailing positional te
 | `getDouble(String flag, double defaultValue)` | `double` | Parses double value (supports `.` and `,` decimal separators). |
 | `getBoolean(String flag, boolean defaultValue)` | `boolean` | Parses boolean flag (`"true"`, `"1"`, `"yes"` evaluate to `true`). |
 | `args()` | `List<String>` | Returns all positional non-flag arguments in original order. |
+| `globArgs()` | `List<String>` | Returns positional arguments with wildcards (*, ?, **) expanded into file paths. |
 | `arg(int index)` | `String` | Retrieves positional argument at index (or `null` if out of bounds). |
 | `arg(int index, String defaultValue)` | `String` | Retrieves positional argument with fallback default. |
 | `joinedArgs()` | `String` | Returns raw space-joined positional text string. |
+| `getGlobbed(String flag)` | `List<String>` | Expands wildcard file paths from option flag values (e.g. `--files:*.txt`). |
 
 ---
 
@@ -51,6 +53,7 @@ Command-line router and tokenizer engine.
 |:---|:---|:---|
 | `register(FastCLICommand cmd)` | `FastCLIPublicParser` | Registers a command instance under its primary name and all its aliases. |
 | `setDefault(FastCLICommand cmd)` | `FastCLIPublicParser` | Sets fallback default command when no subcommand token matches. |
+| `withGlobExpansion()` | `FastCLIPublicParser` | Enables automatic wildcard expansion for positional arguments and options. |
 | `dispatch(String[] args)` | `int` | Parses arguments, resolves command or help, and executes the target command. |
 | `parseArguments(String[] args, List<OptionSpec> knownOptions)` | `CLIContext` | Parses tokens into a `CLIContext` using known option specifications. |
 | `printGlobalHelp()` | `void` | Prints standard usage catalog of all registered commands to `System.out`. |
@@ -76,6 +79,20 @@ public record OptionSpec(
 - `OptionSpec(String name, String shortName, String description)`: Boolean flag (`requiresValue = false`).
 - `OptionSpec(String name, String shortName, String description, String defaultValue)`: Value option with default (`requiresValue = true`).
 - Canonical record constructor for full parameter control.
+
+---
+
+## 5. Class: `fastclicommand.FastCLIGlob`
+
+High-performance wildcard file path expander with reflection-based `FastGLOB` native C++/Win32 integration and graceful Java NIO fallback.
+
+### Method Index
+
+| Method Signature | Return Type | Description |
+|:---|:---|:---|
+| `isGlob(String token)` | `boolean` | Fast check if a token contains glob characters (`*`, `?`, `[`). |
+| `resolve(String pattern)` | `List<String>` | Expands wildcard pattern into sorted file paths via `FastGLOB` or Java NIO. |
+| `expand(String[] args)` | `String[]` | Expands an entire array of CLI arguments replacing glob tokens with matched paths. |
 
 ---
 

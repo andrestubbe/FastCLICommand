@@ -158,4 +158,22 @@ public class FastCLICommandTest {
         assertEquals(8080, ctx.getInt("--port", 8080));
         assertEquals(42.0, ctx.getDouble("--port", 42.0));
     }
+
+    @Test
+    public void testFastCLIGlobExpansion() {
+        assertTrue(FastCLIGlob.isGlob("*.xml"));
+        assertTrue(FastCLIGlob.isGlob("src/**/*.java"));
+        assertFalse(FastCLIGlob.isGlob("pom.xml"));
+
+        List<String> files = FastCLIGlob.resolve("*.xml");
+        assertNotNull(files);
+        assertTrue(files.stream().anyMatch(f -> f.endsWith("pom.xml")));
+
+        // Test with FastCLIParser withGlobExpansion
+        FastCLIParser parser = new FastCLIParser().withGlobExpansion();
+        CLIContext ctx = parser.parse(new String[] { "*.xml", "--test" }, 0, 2, null);
+        assertTrue(ctx.has("--test"));
+        assertTrue(ctx.argCount() >= 1);
+        assertTrue(ctx.args().stream().anyMatch(f -> f.endsWith("pom.xml")));
+    }
 }

@@ -9,19 +9,45 @@ import java.util.*;
 public final class FastCLIParser {
 
     private final boolean strict;
+    private final boolean expandGlobs;
 
     public FastCLIParser() {
-        this(false);
+        this(false, false);
     }
 
     public FastCLIParser(boolean strict) {
+        this(strict, false);
+    }
+
+    public FastCLIParser(boolean strict, boolean expandGlobs) {
         this.strict = strict;
+        this.expandGlobs = expandGlobs;
+    }
+
+    public FastCLIParser withGlobExpansion() {
+        return new FastCLIParser(this.strict, true);
+    }
+
+    public FastCLIParser withStrict(boolean strict) {
+        return new FastCLIParser(strict, this.expandGlobs);
     }
 
     public CLIContext parse(String[] args, int from, int to, CompiledCommand compiled) {
         if (args == null || from >= to) {
             return emptyContext(compiled);
         }
+
+        if (expandGlobs) {
+            String[] slice = new String[to - from];
+            System.arraycopy(args, from, slice, 0, to - from);
+            String[] expanded = FastCLIGlob.expand(slice);
+            return parseInternal(expanded, 0, expanded.length, compiled);
+        }
+
+        return parseInternal(args, from, to, compiled);
+    }
+
+    private CLIContext parseInternal(String[] args, int from, int to, CompiledCommand compiled) {
 
         int totalArgs = to - from;
         int expectedOptions = (compiled != null && !compiled.declaredOptions().isEmpty())
