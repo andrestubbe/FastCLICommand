@@ -3,6 +3,21 @@
 All notable changes to **FastCLICommand** will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] — 2026-11-02
+
+### Added
+- **Optional Flag Values (`OptionSpec.optionalValue`)**:
+  - Added support for flags that act as boolean presence switches when supplied alone (`--install`), but capture an optional follow-up argument when present (`--install piper`).
+  - Added factory methods `OptionSpec.optionalValue(name, shortName, description)` and `OptionSpec.optionalValue(name, shortName, description, defaultPresenceValue)`.
+- **CLIContext Utility Helpers**:
+  - `unquote(String)`: Trims and strips surrounding single or double quotes from strings.
+  - `findExistingFile()`: Searches positional arguments and returns the first token matching an existing regular file on disk.
+  - `isHelpRequested()`: Detects standard help flags (`--help`, `-h`, `/?`) as well as leading `help` subcommands.
+  - `isStdinPiped()`: Checks whether unconsumed data is waiting on standard input (`System.in.available() > 0`).
+  - `readStdinSafely()`: Non-blocking UTF-8 reader consuming piped input streams safely.
+
+---
+
 ## [0.1.3] — 2026-10-18
 
 ### Added

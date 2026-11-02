@@ -40,6 +40,11 @@ Encapsulates parsed command-line parameters, options, and trailing positional te
 | `arg(int index, String defaultValue)` | `String` | Retrieves positional argument with fallback default. |
 | `joinedArgs()` | `String` | Returns raw space-joined positional text string. |
 | `getGlobbed(String flag)` | `List<String>` | Expands wildcard file paths from option flag values (e.g. `--files:*.txt`). |
+| `unquote(String s)` | `String` | Strips enclosing single or double quotes from string. |
+| `findExistingFile()` | `Optional<Path>` | Finds the first positional argument pointing to an existing file on disk. |
+| `isHelpRequested()` | `boolean` | Checks if help is requested via flags (`--help`, `-h`, `/?`) or leading `help` subcommand. |
+| `isStdinPiped()` | `boolean` | Checks if standard input has data piped into the process. |
+| `readStdinSafely()` | `String` | Safely reads all available UTF-8 text from stdin without blocking. |
 
 ---
 
@@ -70,14 +75,20 @@ public record OptionSpec(
     String shortName,
     String description,
     boolean requiresValue,
-    String defaultValue
+    boolean allowsOptionalValue,
+    String defaultValue,
+    String longKey,
+    String shortKey
 )
 ```
 
-### Constructors
+### Constructors & Factories
 
 - `OptionSpec(String name, String shortName, String description)`: Boolean flag (`requiresValue = false`).
+- `OptionSpec(String name, String shortName, String description, boolean requiresValue)`: Explicit value requirement setting.
 - `OptionSpec(String name, String shortName, String description, String defaultValue)`: Value option with default (`requiresValue = true`).
+- `OptionSpec.optionalValue(String name, String shortName, String description)`: Optional value flag (`allowsOptionalValue = true`, defaults to `"true"` if present without value).
+- `OptionSpec.optionalValue(String name, String shortName, String description, String defaultPresenceValue)`: Optional value flag with custom default presence value.
 - Canonical record constructor for full parameter control.
 
 ---

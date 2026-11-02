@@ -196,7 +196,7 @@ Add the JitPack repository and dependency to your `pom.xml`:
     <dependency>
         <groupId>com.github.andrestubbe</groupId>
         <artifactId>FastCLICommand</artifactId>
-        <version>0.1.3</version>
+        <version>0.1.4</version>
     </dependency>
 </dependencies>
 ```
@@ -211,7 +211,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.github.andrestubbe:FastCLICommand:0.1.3'
+    implementation 'com.github.andrestubbe:FastCLICommand:0.1.4'
 }
 ```
 
@@ -219,7 +219,7 @@ dependencies {
 
 Download the latest pre-compiled JAR directly from GitHub Releases:
 
-1. 📦 [**FastCLICommand-0.1.3.jar**](https://github.com/andrestubbe/FastCLICommand/releases/download/0.1.3/FastCLICommand-0.1.3.jar)
+1. 📦 [**FastCLICommand-0.1.4.jar**](https://github.com/andrestubbe/FastCLICommand/releases/download/0.1.4/FastCLICommand-0.1.4.jar)
 
 ---
 
