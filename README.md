@@ -1,10 +1,10 @@
-# FastCLICommand 0.1.3 [ALPHA-2026-10-18] — Zero-Allocation, Ultra-Fast Command Line Parser and Dispatcher for Java
+# FastCLICommand 0.1.4 — Zero-Allocation, Ultra-Fast Command Line Parser and Dispatcher for Java
 
-[![Status](https://img.shields.io/badge/status-0.1.3-brightgreen.svg)](https://github.com/andrestubbe/FastCLICommand/releases/tag/0.1.3)
+[![Status](https://img.shields.io/badge/status-0.1.4-brightgreen.svg)](https://github.com/andrestubbe/FastCLICommand/releases/tag/0.1.4)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Java](https://img.shields.io/badge/Java-21+-blue.svg)](https://www.java.com)
 [![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)]()
-[![JitPack](https://img.shields.io/badge/JitPack-0.1.3-green.svg)](https://jitpack.io/#andrestubbe/FastCLICommand)
+[![JitPack](https://img.shields.io/badge/JitPack-0.1.4-green.svg)](https://jitpack.io/#andrestubbe/FastCLICommand)
 
 ---
 
@@ -91,11 +91,13 @@ Existing Java command-line libraries (such as Picocli, JCommander, and Apache Co
 ## Key Features
 
 - ⚡ **Ultra-Fast Dispatching** — Dispatches subcommands and routes flags at over **1.5 million executions per second**.
+- 🛠️ **Optional Flag Values (`OptionSpec.optionalValue`)** — Supports flags that act as boolean presence toggles when passed alone (`--install`), but capture an optional follow-up value when provided (`--install piper`).
+- 🔍 **File & Piped Stdin Utilities** — Automatic detection of existing files in positional arguments (`ctx.findExistingFile()`), unquoting helpers (`CLIContext.unquote()`), and safe non-blocking reading of piped input streams (`CLIContext.readStdinSafely()`).
+- 📖 **Automatic Help Detection** — Built-in `ctx.isHelpRequested()` detecting `--help`, `-h`, `/?`, as well as leading `help` subcommands.
 - 🔍 **Zero-Overhead Wildcard & Glob Expansion** — Transparently expands wildcards (`*`, `?`, `**`) into sorted file paths via `FastGLOB` native C++/Win32 FFM, with graceful sub-millisecond Java NIO fallback when `FastGLOB` is not present.
 - 🛠️ **Flexible Argument Syntax** — Seamlessly parses GNU-style flags (`--verbose`), short flags (`-v`), equals pairs (`--port=8080`), colon pairs (`--port:8080`), and space-separated values (`--port 8080`).
 - 🎯 **Type-Safe `CLIContext`** — Direct zero-overhead accessors (`ctx.getInt(...)`, `ctx.getDouble(...)`, `ctx.getBoolean(...)`, `ctx.get(...)`, `ctx.globArgs()`, `ctx.getGlobbed(...)`, `ctx.joinedArgs()`).
 - 🏷️ **Subcommands & Aliases** — Built-in support for hierarchical commands and shorthand aliases (e.g. `b` for `build`, `s` for `serve`).
-- 📖 **Automatic Help Generation** — Clean, formatted global help generation (`--help`, `-h`, `/?`) with command descriptions and option specifications.
 - 🪶 **Zero Dependency Bloat** — 100% pure Java 21+. Zero external dependencies, no native binaries, no annotation processors.
 
 ---
@@ -165,6 +167,10 @@ myapp run --config:prod.json
 
 # Space-separated value (configured via OptionSpec.requiresValue)
 myapp run --port 8080
+
+# Optional value flag (OptionSpec.optionalValue)
+myapp run --install           # evaluates to "true"
+myapp run --install piper     # evaluates to "piper"
 
 # Positional arguments & trailing text
 myapp run file1.txt file2.txt --output result.bin

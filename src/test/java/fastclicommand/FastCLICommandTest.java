@@ -176,4 +176,39 @@ public class FastCLICommandTest {
         assertTrue(ctx.argCount() >= 1);
         assertTrue(ctx.args().stream().anyMatch(f -> f.endsWith("pom.xml")));
     }
+
+    @Test
+    public void testOptionalValueFlagsAndHelpers() {
+        FastCLIPublicParser parser = new FastCLIPublicParser();
+        List<OptionSpec> specs = List.of(
+                OptionSpec.optionalValue("install", "i", "Install engine or all"),
+                new OptionSpec("gui", "g", "Launch GUI")
+        );
+
+        // Case 1: Flag without value
+        CLIContext ctx1 = parser.parseArguments(new String[] { "--install", "--gui" }, specs);
+        assertTrue(ctx1.has("--install"));
+        assertEquals("true", ctx1.get("--install"));
+        assertTrue(ctx1.has("--gui"));
+
+        // Case 2: Flag with value
+        CLIContext ctx2 = parser.parseArguments(new String[] { "-i", "piper", "--gui" }, specs);
+        assertTrue(ctx2.has("--install"));
+        assertEquals("piper", ctx2.get("--install"));
+        assertEquals("piper", ctx2.get("-i"));
+
+        // Case 3: Unquote and file detection
+        assertEquals("test file.png", CLIContext.unquote("\"test file.png\""));
+        assertEquals("hello", CLIContext.unquote("'hello'"));
+
+        CLIContext ctx3 = parser.parseArguments(new String[] { "\"pom.xml\"" }, List.of());
+        assertTrue(ctx3.findExistingFile().isPresent());
+        assertTrue(ctx3.findExistingFile().get().endsWith("pom.xml"));
+
+        // Case 4: Help detection
+        CLIContext ctxHelp1 = parser.parseArguments(new String[] { "/?" }, List.of());
+        assertTrue(ctxHelp1.isHelpRequested());
+        CLIContext ctxHelp2 = parser.parseArguments(new String[] { "help" }, List.of());
+        assertTrue(ctxHelp2.isHelpRequested());
+    }
 }

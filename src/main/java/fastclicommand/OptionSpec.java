@@ -12,6 +12,7 @@ public record OptionSpec(
         String shortName,
         String description,
         boolean requiresValue,
+        boolean allowsOptionalValue,
         String defaultValue,
         String longKey,
         String shortKey
@@ -22,19 +23,27 @@ public record OptionSpec(
     }
 
     public OptionSpec(String name, String shortName, String description) {
-        this(name, shortName, description, false, null);
+        this(name, shortName, description, false, false, null, null, null);
     }
 
     public OptionSpec(String name, String shortName, String description, boolean requiresValue) {
-        this(name, shortName, description, requiresValue, null);
+        this(name, shortName, description, requiresValue, false, null, null, null);
     }
 
     public OptionSpec(String name, String shortName, String description, String defaultValue) {
-        this(name, shortName, description, true, defaultValue);
+        this(name, shortName, description, true, false, defaultValue, null, null);
     }
 
     public OptionSpec(String name, String shortName, String description, boolean requiresValue, String defaultValue) {
-        this(name, shortName, description, requiresValue, defaultValue, null, null);
+        this(name, shortName, description, requiresValue, false, defaultValue, null, null);
+    }
+
+    public static OptionSpec optionalValue(String name, String shortName, String description) {
+        return new OptionSpec(name, shortName, description, false, true, null, null, null);
+    }
+
+    public static OptionSpec optionalValue(String name, String shortName, String description, String defaultPresenceValue) {
+        return new OptionSpec(name, shortName, description, false, true, defaultPresenceValue, null, null);
     }
 
     private static String normalizeLong(String n) {

@@ -90,6 +90,13 @@ public final class FastCLIParser {
                         } else {
                             throw new CLIParseException(rawKey, "Option requires a value but none was provided");
                         }
+                    } else if (spec != null && spec.allowsOptionalValue()) {
+                        if (i + 1 < to && !args[i + 1].equals("--") && !isFlagToken(args[i + 1])) {
+                            recordOption(rawKey, args[i + 1], compiled, parsedOptions);
+                            i++;
+                        } else {
+                            recordOption(rawKey, spec.defaultValue() != null ? spec.defaultValue() : "true", compiled, parsedOptions);
+                        }
                     } else {
                         recordOption(rawKey, "true", compiled, parsedOptions);
                     }
@@ -125,10 +132,12 @@ public final class FastCLIParser {
     }
 
     private static boolean isFlagToken(String arg) {
-        if (!arg.startsWith("-") || arg.length() < 2) return false;
-        // Negative numbers like -1 or -5.5 should be positional unless matched as known flag
-        char c = arg.charAt(1);
-        return !(c >= '0' && c <= '9');
+        if (arg == null || arg.length() < 2) return false;
+        if (arg.startsWith("-")) {
+            char c = arg.charAt(1);
+            return !(c >= '0' && c <= '9');
+        }
+        return arg.startsWith("/");
     }
 
     private static CLIContext emptyContext(CompiledCommand compiled) {

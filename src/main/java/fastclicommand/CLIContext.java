@@ -217,9 +217,83 @@ public final class CLIContext {
         return List.of(val);
     }
 
+    /**
+     * Checks whether help is requested either via standard flags (--help, -h, /?)
+     * or by a leading "help" subcommand.
+     */
+    public boolean isHelpRequested() {
+        if (has("--help") || has("-h") || contains("/?")) return true;
+        return argCount() > 0 && "help".equalsIgnoreCase(arg(0));
+    }
+
+    /**
+     * Unquotes a string by removing single or double enclosing quotation marks if present.
+     */
+    public static String unquote(String s) {
+        if (s == null) return null;
+        String trimmed = s.trim();
+        if (trimmed.length() >= 2) {
+            char first = trimmed.charAt(0);
+            char last = trimmed.charAt(trimmed.length() - 1);
+            if ((first == '"' && last == '"') || (first == '\'' && last == '\'')) {
+                return trimmed.substring(1, trimmed.length() - 1).trim();
+            }
+        }
+        return trimmed;
+    }
+
+    /**
+     * Finds the first positional argument that corresponds to an existing regular file on disk.
+     */
+    public Optional<java.nio.file.Path> findExistingFile() {
+        for (int i = 0; i < positionalCount; i++) {
+            String raw = rawArgs[positionalIndices[i]];
+            if (raw == null || raw.isBlank()) continue;
+            String clean = unquote(raw);
+            try {
+                java.nio.file.Path p = java.nio.file.Path.of(clean);
+                if (java.nio.file.Files.isRegularFile(p)) {
+                    return Optional.of(p);
+                }
+            } catch (Throwable ignored) {}
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Checks if standard input currently has unconsumed data piped into this process.
+     */
+    public static boolean isStdinPiped() {
+        try {
+            return System.in.available() > 0;
+        } catch (Throwable ignored) {
+            return false;
+        }
+    }
+
+    /**
+     * Safely reads all available piped text from stdin in UTF-8 without blocking indefinitely.
+     */
+    public static String readStdinSafely() {
+        try {
+            if (System.in.available() > 0) {
+                var reader = new java.io.BufferedReader(new java.io.InputStreamReader(System.in, java.nio.charset.StandardCharsets.UTF_8));
+                var sb = new StringBuilder();
+                String line;
+                while (System.in.available() > 0 && (line = reader.readLine()) != null) {
+                    if (!sb.isEmpty()) sb.append(" ");
+                    sb.append(line);
+                }
+                String res = sb.toString().trim();
+                return res.isEmpty() ? null : res;
+            }
+        } catch (Throwable ignored) {}
+        return null;
+    }
+
     private static String normalizeLookupKey(String k) {
         String trimmed = k.trim().toLowerCase(Locale.ROOT);
-        if (trimmed.startsWith("-")) return trimmed;
+        if (trimmed.startsWith("-") || trimmed.startsWith("/")) return trimmed;
         return trimmed.length() == 1 ? ("-" + trimmed) : ("--" + trimmed);
     }
 }
